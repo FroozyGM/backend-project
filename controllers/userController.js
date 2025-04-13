@@ -28,7 +28,7 @@ class UserController {
   // PUT /api/users/profile
   async updateProfile(req, res) {
     try {
-      const { name, email, photo } = req.body;
+      const { name, email, photo, phone } = req.body;
 
       const user = await User.findById(req.user.id);
       if (!user) {
@@ -38,6 +38,7 @@ class UserController {
       if (name) user.name = name;
       if (email) user.email = email;
       if (photo) user.photo = photo;
+      if (phone) user.phone = phone;
 
       await user.save();
 
@@ -141,7 +142,6 @@ class UserController {
       res.status(500).json({ error: error.message });
     }
   }
-
 
   calculateDuration(startDate, endDate) {
     const start = new Date(startDate);
