@@ -34,13 +34,23 @@ class AuthController {
         },
       };
 
+      console.log("JWT_EXPIRE:", process.env.JWT_EXPIRE);
+
       jwt.sign(
         payload,
         process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRE },
+        { expiresIn: "24h" },
         (err, token) => {
           if (err) throw err;
-          res.json({ token });
+          res.json({
+            token: `Bearer ${token}`,
+            user: {
+              id: user._id,
+              name: user.name,
+              phone: user.phone,
+              role: user.role,
+            },
+          });
         }
       );
     } catch (error) {
@@ -72,13 +82,23 @@ class AuthController {
         },
       };
 
+      console.log("JWT_EXPIRE:", process.env.JWT_EXPIRE);
+
       jwt.sign(
         payload,
         process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRE },
+        { expiresIn: "24h" },
         (err, token) => {
           if (err) throw err;
-          res.json({ token });
+          res.json({
+            token: `Bearer ${token}`,
+            user: {
+              id: user._id,
+              name: user.name,
+              phone: user.phone,
+              role: user.role,
+            },
+          });
         }
       );
     } catch (error) {
@@ -103,6 +123,46 @@ class AuthController {
       await user.save();
 
       res.json({ message: "Статус успешно изменен на арендодателя" });
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async refreshToken(req, res) {
+    try {
+      const userId = req.user.id;
+
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({ message: "Пользователь не найден" });
+      }
+
+      const payload = {
+        user: {
+          id: user.id,
+          role: user.role,
+        },
+      };
+
+      jwt.sign(
+        payload,
+        process.env.JWT_SECRET,
+        { expiresIn: "24h" },
+        (err, token) => {
+          if (err) throw err;
+          res.json({
+            token: `Bearer ${token}`,
+            user: {
+              id: user._id,
+              name: user.name,
+              phone: user.phone,
+              role: user.role,
+            },
+          });
+        }
+      );
     } catch (error) {
       console.error(error.message);
       res.status(500).json({ error: error.message });
