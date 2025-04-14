@@ -19,5 +19,6 @@ router.post(
   authController.becomeOwner
 );
 router.post("/refresh-token", auth, authController.refreshToken);
+router.post("/logout", auth, authController.logout);
 
 export default router;

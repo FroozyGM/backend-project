@@ -168,6 +168,17 @@ class AuthController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async logout(req, res) {
+    try {
+      return res.status(200).json({
+        message: "Успешный выход из системы",
+      });
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 export default new AuthController();
