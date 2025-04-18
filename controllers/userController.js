@@ -64,14 +64,17 @@ class UserController {
         .populate("coworking", "name location")
         .sort({ createdAt: -1 });
 
-      const bookingHistory = bookings.map((booking) => ({
-        id: booking._id,
-        coworkingName: booking.coworking.name,
-        location: booking.coworking.location,
-        date: new Date(booking.startDate).toISOString().split("T")[0],
-        duration: this.calculateDuration(booking.startDate, booking.endDate),
-        status: booking.status,
-      }));
+      const bookingHistory = bookings.map((booking) => {
+        const duration = calculateDuration(booking.startDate, booking.endDate);
+        return {
+          id: booking._id,
+          coworkingName: booking.coworking.name,
+          location: booking.coworking.location,
+          date: new Date(booking.startDate).toISOString().split("T")[0],
+          duration,
+          status: booking.status,
+        };
+      });
 
       res.json(bookingHistory);
     } catch (error) {
@@ -93,17 +96,20 @@ class UserController {
         .populate("coworking", "name location")
         .sort({ startDate: 1 });
 
-      const currentBookings = bookings.map((booking) => ({
-        id: booking._id,
-        coworkingName: booking.coworking.name,
-        location: booking.coworking.location,
-        date: new Date(booking.startDate).toLocaleDateString("ru-RU", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }),
-        duration: this.calculateDuration(booking.startDate, booking.endDate),
-      }));
+      const currentBookings = bookings.map((booking) => {
+        const duration = calculateDuration(booking.startDate, booking.endDate);
+        return {
+          id: booking._id,
+          coworkingName: booking.coworking.name,
+          location: booking.coworking.location,
+          date: new Date(booking.startDate).toLocaleDateString("ru-RU", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          }),
+          duration,
+        };
+      });
 
       res.json(currentBookings);
     } catch (error) {
@@ -142,18 +148,19 @@ class UserController {
       res.status(500).json({ error: error.message });
     }
   }
+}
 
-  calculateDuration(startDate, endDate) {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const diffHours = Math.round((end - start) / (1000 * 60 * 60));
+// Вынесем функцию calculateDuration за пределы класса
+function calculateDuration(startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diffHours = Math.round((end - start) / (1000 * 60 * 60));
 
-    if (diffHours < 24) {
-      return `${diffHours} часа`;
-    } else {
-      const days = Math.floor(diffHours / 24);
-      return `${days} день`;
-    }
+  if (diffHours < 24) {
+    return `${diffHours} часа`;
+  } else {
+    const days = Math.floor(diffHours / 24);
+    return `${days} день`;
   }
 }
 

@@ -43,7 +43,7 @@ class AuthController {
         (err, token) => {
           if (err) throw err;
           res.json({
-            token: `Bearer ${token}`,
+            token: token,
             user: {
               id: user._id,
               name: user.name,
@@ -91,7 +91,7 @@ class AuthController {
         (err, token) => {
           if (err) throw err;
           res.json({
-            token: `Bearer ${token}`,
+            token: token,
             user: {
               id: user._id,
               name: user.name,
@@ -153,7 +153,7 @@ class AuthController {
         (err, token) => {
           if (err) throw err;
           res.json({
-            token: `Bearer ${token}`,
+            token: token,
             user: {
               id: user._id,
               name: user.name,
