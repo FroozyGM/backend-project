@@ -60,25 +60,50 @@ class UserController {
   // GET /api/users/bookings
   async getBookingHistory(req, res) {
     try {
+      console.log("Getting booking history for user:", req.user.id);
+
       const bookings = await Booking.find({ user: req.user.id })
         .populate("coworking", "name location")
         .sort({ createdAt: -1 });
 
+      console.log("Found bookings:", bookings.length);
+
       const bookingHistory = bookings.map((booking) => {
-        const duration = calculateDuration(booking.startDate, booking.endDate);
-        return {
-          id: booking._id,
-          coworkingName: booking.coworking.name,
-          location: booking.coworking.location,
-          date: new Date(booking.startDate).toISOString().split("T")[0],
-          duration,
-          status: booking.status,
-        };
+        try {
+          // Проверка наличия необходимых данных
+          if (!booking.coworking) {
+            console.error("Booking has no coworking data:", booking._id);
+            return {
+              id: booking._id,
+              coworkingName: "Неизвестно",
+              location: "Неизвестно",
+              date: new Date(booking.startDate).toISOString().split("T")[0],
+              duration: calculateDuration(booking.startDate, booking.endDate),
+              status: booking.status,
+            };
+          }
+
+          return {
+            id: booking._id,
+            coworkingName: booking.coworking.name || "Неизвестно",
+            location: booking.coworking.location || "Неизвестно",
+            date: new Date(booking.startDate).toISOString().split("T")[0],
+            duration: calculateDuration(booking.startDate, booking.endDate),
+            status: booking.status,
+          };
+        } catch (mapError) {
+          console.error("Error mapping booking:", mapError);
+          return {
+            id: booking._id,
+            error: "Ошибка обработки бронирования",
+            status: booking.status,
+          };
+        }
       });
 
       res.json(bookingHistory);
     } catch (error) {
-      console.error(error.message);
+      console.error("Error in getBookingHistory:", error.message);
       res.status(500).json({ error: error.message });
     }
   }
@@ -150,7 +175,6 @@ class UserController {
   }
 }
 
-// Вынесем функцию calculateDuration за пределы класса
 function calculateDuration(startDate, endDate) {
   const start = new Date(startDate);
   const end = new Date(endDate);
